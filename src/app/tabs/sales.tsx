@@ -1,6 +1,6 @@
-import { Button } from '../components/Button';
-import { Header } from '../components/Header';
-import { Input } from '../components/Input';
+import { Button } from '../../components/Button';
+import { Header } from '../../components/Header';
+import { Input } from '../../components/Input';
 import { StatusBar } from 'expo-status-bar';
 import { useState, useEffect } from 'react';
 import {
@@ -18,7 +18,7 @@ import {
   getRecentSales,
   updateSale,
   deleteSale,
-} from '../database/salesRepository';
+} from '../../database/salesRepository';
 import { Edit, Trash2, Check } from 'lucide-react-native';
 
 export default function Sales() {

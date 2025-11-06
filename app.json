@@ -1,5 +1,6 @@
 {
   "expo": {
+    "scheme": "sabordavilaapp",
     "name": "SaborDaVilaAppClean",
     "slug": "SaborDaVilaAppClean",
     "version": "1.0.0",
@@ -21,7 +22,8 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.SaborDaVilaAppClean"
     },
     "web": {
       "favicon": "./assets/favicon.png"

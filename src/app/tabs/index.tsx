@@ -1,15 +1,15 @@
-import { Button } from '../components/Button';
-import { Card } from '../components/Card';
-import { Header } from '../components/Header';
+import { Button } from '../../components/Button';
+import { Card } from '../../components/Card';
+import { Header } from '../../components/Header';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { initializeDatabase } from '../database/database';
-import { getDailySales, getWeeklySummary, initializeSalesTable } from '../database/salesRepository';
-import { SalesSummary } from '../types/sales';
+import { initializeDatabase } from '../../database/database';
+import { getDailySales, getWeeklySummary, initializeSalesTable } from '../../database/salesRepository';
+import { SalesSummary } from '../../types/sales';
 import { BarChart, Plus, Check } from 'lucide-react-native';
-import { NETSIM_HOST, NETSIM_PORT } from '../config/netsim';
+import { NETSIM_HOST, NETSIM_PORT } from '../../config/netsim';
 
 
 export default function Index() {

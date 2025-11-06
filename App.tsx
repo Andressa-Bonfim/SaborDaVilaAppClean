@@ -1,4 +1,4 @@
-import App from '@/app';
+import App from '@/app/tabs';
 import 'expo-router/entry';
 import ReactDOMClient from 'react-dom/client';
 

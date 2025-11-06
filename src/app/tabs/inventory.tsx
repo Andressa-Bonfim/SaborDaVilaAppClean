@@ -8,18 +8,18 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
-import { Input } from '../components/Input';
-import { Button } from '../components/Button';
-import { Header } from '../components/Header';
+import { Input } from '../../components/Input';
+import { Button } from '../../components/Button';
+import { Header } from '../../components/Header';
 import { StatusBar } from 'expo-status-bar';
 
-import { initializeDatabase } from '../database/database';
+import { initializeDatabase } from '../../database/database';
 import {
   getAllProducts,
   insertProduct,
   updateProduct,
   deleteProduct,
-} from '../database/productRepository';
+} from '../../database/productRepository';
 import { Edit, Trash2, Plus } from 'lucide-react-native';
 
 
