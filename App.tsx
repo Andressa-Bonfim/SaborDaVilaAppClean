@@ -1,20 +1,13 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import App from '@/app';
+import 'expo-router/entry';
+import ReactDOMClient from 'react-dom/client';
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+const container = document.getElementById('app');
+
+
+if (container) {
+  const root = ReactDOMClient.createRoot(container);
+  root.render(<App />);
+} else {
+  console.error("Elemento #app não encontrado no DOM");
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
