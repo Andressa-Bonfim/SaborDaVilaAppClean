@@ -137,8 +137,6 @@ npm run web     # roda no navegador
 
 ## Contribuições
 
-Contribuições são bem-vindas. Abra uma issue ou envie um PR com descrições claras do que mudou. Para mudanças maiores, prefira criar uma branch por feature.
-
-
-
+Andressa Bonfim de Araujo
+- [Linkedin](https://www.linkedin.com/in/andressa-bonfim/)
 
