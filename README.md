@@ -1,29 +1,35 @@
 # Sabor da Vila App
 
-Aplicativo mobile para gerenciamento de vendas e controle de estoque da lanchonete "Sabor da Vila". O projeto foi criado com Expo + React Native e foca em uma experiência simples e rápida para registrar vendas e gerenciar produtos.
+Aplicativo mobile para gerenciamento de vendas e controle de estoque da lanchonete **Sabor da Vila**.  
+Criado com **Expo + React Native**, o projeto foca em uma experiência simples e rápida para registrar vendas e gerenciar produtos.
 
-## � Principais pontos
-- Navegação por plataforma: Drawer (menu hambúrguer) no Android e abas inferiores no iOS
-- Header customizado com botão de menu (Android)
-- Banco local com SQLite para vendas e estoque
+---
+
+## ✨ Principais pontos
+- Navegação por plataforma: Drawer (menu hambúrguer) no Android e abas inferiores no iOS  
+- Header customizado com botão de menu (Android)  
+- Banco local com SQLite para vendas e estoque  
 
 ---
 
 ## 📸 Screenshots Android
 
-
-![Menu](./assets/screenshots/Screenshot_1762491989.png)
-![Dashboard](./assets/screenshots/Screenshot_1762491996.png)
-![Vendas](./assets/screenshots/Screenshot_1762492004.png)
-![Estoque](./assets/screenshots/Screenshot_1762492068.png)
+<p align="center">
+  <img src="./assets/screenshots/Screenshot_1762491989.png" width="230" alt="Menu" />
+  <img src="./assets/screenshots/Screenshot_1762491996.png" width="230" alt="Dashboard" />
+  <img src="./assets/screenshots/Screenshot_1762492004.png" width="230" alt="Vendas" />
+  <img src="./assets/screenshots/Screenshot_1762492068.png" width="230" alt="Estoque" />
+</p>
 
 ---
 
-## 📸 Screenshots IOS
+## 📸 Screenshots iOS
 
-![Dashboard](./assets/screenshots/Dashboard.jpg)
-![Vendas](./assets/screenshots/Vendas.jpg)
-![Estoque](./assets/screenshots/Estoque.jpg)
+<p align="center">
+  <img src="./assets/screenshots/Dashboard.jpg" width="230" alt="Dashboard iOS" />
+  <img src="./assets/screenshots/Vendas.jpg" width="230" alt="Vendas iOS" />
+  <img src="./assets/screenshots/Estoque.jpg" width="230" alt="Estoque iOS" />
+</p>
 
 ---
 
@@ -83,14 +89,19 @@ npx expo start --web
 ```
 src/
 ├─ app/                 # Rotas e telas (Expo Router)
-│  ├─ _layout.tsx       # Layout root: Drawer (Android) / Slot (iOS)
-│  ├─ index.tsx         # Dashboard
-│  ├─ tabs/             # Layouts e telas das abas
-│  │  ├─ _layout.tsx    # Tabs bottom (iOS)
+|  ├─ tabs/             # Layouts e telas das abas
+|  |  ├─ _layout.tsx    # Tabs bottom (IOS)
 │  │  ├─ index.tsx      # Tela principal (Dashboard)
 │  │  ├─ sales.tsx      # Vendas
-│  │  └─ inventory.tsx  # Estoque
+│  │  └─ inventory.tsx  # Estoque  
+│  ├─ _layout.tsx       # Layout root: Drawer (Android)
+│  ├─ index.tsx         # Tela principal (Dashboard)   
+|  ├─ settings.tsx      # Placeholder simples
 ├─ components/          # Componentes reutilizáveis (Header, Button, Card...)
+|   ├─ Button.tsx       # Componente de botão customizável com variantes, tamanhos e suporte a ícones
+|   ├─ Card.tsx         # Componente Card para exibir informações resumidas em um cartão estilizado 
+|   ├─ Header.tsx       # Componente Header que exibe o título da tela e um botão de menu no Android 
+|   ├─ Input.tsx        # Componente Input para campos de entrada de texto com estilo personalizado
 ├─ database/            # Repositórios e inicialização do SQLite
 ├─ assets/              # Imagens, screenshots, fontes
 └─ styles/              # Config global do styling
@@ -130,9 +141,8 @@ npm run web     # roda no navegador
 ---
 
 ## Contribuições
-
-Contribuições são bem-vindas. Abra uma issue ou envie um PR com descrições claras do que mudou. Para mudanças maiores, prefira criar uma branch por feature.
-
-
-
+- Douglas Souza Silva
+  - [Linkedin](https://www.linkedin.com/in/ddouglss/)
+- Andressa Bonfim de Araujo
+  - [Linkedin](https://www.linkedin.com/in/andressa-bonfim/)
 
