@@ -89,14 +89,19 @@ npx expo start --web
 ```
 src/
 ├─ app/                 # Rotas e telas (Expo Router)
-│  ├─ _layout.tsx       # Layout root: Drawer (Android) / Slot (iOS)
-│  ├─ index.tsx         # Dashboard
-│  ├─ tabs/             # Layouts e telas das abas
-│  │  ├─ _layout.tsx    # Tabs bottom (iOS)
+|  ├─ tabs/             # Layouts e telas das abas
+|  |  ├─ _layout.tsx    # Tabs bottom (IOS)
 │  │  ├─ index.tsx      # Tela principal (Dashboard)
 │  │  ├─ sales.tsx      # Vendas
-│  │  └─ inventory.tsx  # Estoque
+│  │  └─ inventory.tsx  # Estoque  
+│  ├─ _layout.tsx       # Layout root: Drawer (Android)
+│  ├─ index.tsx         # Tela principal (Dashboard)   
+|  ├─ settings.tsx      # Placeholder simples
 ├─ components/          # Componentes reutilizáveis (Header, Button, Card...)
+|   ├─ Button.tsx       # Componente de botão customizável com variantes, tamanhos e suporte a ícones
+|   ├─ Card.tsx         # Componente Card para exibir informações resumidas em um cartão estilizado 
+|   ├─ Header.tsx       # Componente Header que exibe o título da tela e um botão de menu no Android 
+|   ├─ Input.tsx        # Componente Input para campos de entrada de texto com estilo personalizado
 ├─ database/            # Repositórios e inicialização do SQLite
 ├─ assets/              # Imagens, screenshots, fontes
 └─ styles/              # Config global do styling
@@ -136,7 +141,8 @@ npm run web     # roda no navegador
 ---
 
 ## Contribuições
-
-Andressa Bonfim de Araujo
-- [Linkedin](https://www.linkedin.com/in/andressa-bonfim/)
+- Douglas Souza Silva
+  - [Linkedin](https://www.linkedin.com/in/ddouglss/)
+- Andressa Bonfim de Araujo
+  - [Linkedin](https://www.linkedin.com/in/andressa-bonfim/)
 
