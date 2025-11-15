@@ -3,6 +3,7 @@ import { Header } from '../../components/Header';
 import { Input } from '../../components/Input';
 import { StatusBar } from 'expo-status-bar';
 import { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import {
   Alert,
   ScrollView,
@@ -22,6 +23,7 @@ import {
 import { Edit, Trash2, Check } from 'lucide-react-native';
 
 export default function Sales() {
+  const { user, activeShop } = useAuth();
   const [productName, setProductName] = useState<string>('');
   const [quantity, setQuantity] = useState<string>('');
   const [totalValue, setTotalValue] = useState<string>('');
@@ -38,11 +40,24 @@ export default function Sales() {
         `${FileSystem.documentDirectory}SQLite/saborDaVila.db`
       );
     }
-  }, []);
+  }, [activeShop?.id]);
 
   const loadRecentSales = async () => {
-    const sales = await getRecentSales();
-    setRecentSales(sales);
+    try {
+      if (!activeShop?.id) {
+        console.warn('⚠️ Vendas: shopId não disponível');
+        setRecentSales([]);
+        return;
+      }
+      
+      console.log(`📊 Vendas: Carregando vendas da loja ${activeShop.id}`);
+      const sales = await getRecentSales(activeShop.id);
+      setRecentSales(sales);
+      console.log(`✅ Vendas: ${sales.length} vendas carregadas`);
+    } catch (error) {
+      console.error('❌ Vendas: Erro ao carregar vendas:', error);
+      setRecentSales([]);
+    }
   };
 
   const resetForm = () => {
@@ -75,7 +90,11 @@ export default function Sales() {
         await updateSale(editingSale.id, prod, qtyNum, totalNum);
         Alert.alert('Sucesso', 'Venda atualizada com sucesso!');
       } else {
-        await insertSale(prod, qtyNum, totalNum);
+        if (!activeShop?.id) {
+          Alert.alert('Erro', 'ShopId não encontrado. Faça login novamente.');
+          return;
+        }
+        await insertSale(prod, qtyNum, totalNum, activeShop.id);
         Alert.alert('Venda registrada!', `${prod} - ${qtyNum} un - R$ ${totalNum}`);
       }
 

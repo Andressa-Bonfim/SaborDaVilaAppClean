@@ -1,76 +1,138 @@
-# Sabor da Vila App
+# 🍔 Sabor da Vila App
 
-Aplicativo mobile para gerenciamento de vendas e controle de estoque da lanchonete **Sabor da Vila**.  
-Criado com **Expo + React Native**, o projeto foca em uma experiência simples e rápida para registrar vendas e gerenciar produtos.
+Aplicativo mobile profissional para gerenciamento completo de vendas, controle de estoque e administração de múltiplas lojas da lanchonete **Sabor da Vila**.
 
----
-
-## ✨ Principais pontos
-- Navegação por plataforma: Drawer (menu hambúrguer) no Android e abas inferiores no iOS  
-- Header customizado com botão de menu (Android)  
-- Banco local com SQLite para vendas e estoque  
+Desenvolvido com **Expo + React Native + TypeScript**, oferece uma experiência robusta e intuitiva para proprietários e administradores gerenciarem seus negócios de forma eficiente.
 
 ---
 
-## 📸 Screenshots Android
+## 🌟 Funcionalidades Principais
 
+### 👥 **Sistema Multi-Usuário**
+- **Autenticação segura** com registro e login
+- **Múltiplas lojas** por usuário
+- **Sistema de roles** (Usuário/Administrador)
+- **Isolamento de dados** por loja
+- **Troca dinâmica** entre lojas
+
+### 📊 **Dashboard Inteligente**
+- Resumo de vendas do dia
+- Produtos em baixo estoque
+- Vendas recentes
+- Navegação rápida para funcionalidades
+
+### 💰 **Gestão de Vendas**
+- Registro rápido de vendas
+- Desconto automático do estoque
+- Histórico completo com filtros
+- Relatórios em PDF e Excel
+
+### 📦 **Controle de Estoque**
+- Gerenciamento completo de produtos
+- Alertas de estoque baixo
+- Adição/remoção de produtos
+- Controle de quantidades mínimas
+
+### 🛡️ **Painel Administrativo**
+- **Backup/Restauração** do banco de dados
+- **Estatísticas detalhadas** do sistema
+- **Exportação** de dados
+- **Limpeza** de dados de teste
+- **Gerenciamento** de usuários
+
+### 📱 **Interface Adaptativa**
+- **Android:** Navegação por Drawer (menu hambúrguer)
+- **iOS:** Navegação por abas inferiores
+- **Design responsivo** e moderno
+- **Dark theme** com cores profissionais
+
+---
+
+## 🔐 Credenciais de Administrador
+
+Para acessar o painel administrativo:
+- **Email:** `admin@sabordavila.com`
+- **Senha:** `admin123`
+
+---
+
+## 📸 Screenshots
+
+### Android
 <p align="center">
-  <img src="./assets/screenshots/Screenshot_1762491989.png" width="230" alt="Menu" />
-  <img src="./assets/screenshots/Screenshot_1762491996.png" width="230" alt="Dashboard" />
-  <img src="./assets/screenshots/Screenshot_1762492004.png" width="230" alt="Vendas" />
-  <img src="./assets/screenshots/Screenshot_1762492068.png" width="230" alt="Estoque" />
+  <img src="./assets/screenshots/Screenshot_1762491989.png" width="200" alt="Menu" />
+  <img src="./assets/screenshots/Screenshot_1762491996.png" width="200" alt="Dashboard" />
+  <img src="./assets/screenshots/Screenshot_1762492004.png" width="200" alt="Vendas" />
+  <img src="./assets/screenshots/Screenshot_1762492068.png" width="200" alt="Estoque" />
 </p>
 
----
-
-## 📸 Screenshots iOS
-
+### iOS
 <p align="center">
-  <img src="./assets/screenshots/Dashboard.jpg" width="230" alt="Dashboard iOS" />
-  <img src="./assets/screenshots/Vendas.jpg" width="230" alt="Vendas iOS" />
-  <img src="./assets/screenshots/Estoque.jpg" width="230" alt="Estoque iOS" />
+  <img src="./assets/screenshots/Dashboard.jpg" width="200" alt="Dashboard iOS" />
+  <img src="./assets/screenshots/Vendas.jpg" width="200" alt="Vendas iOS" />
+  <img src="./assets/screenshots/Estoque.jpg" width="200" alt="Estoque iOS" />
 </p>
 
 ---
 
 ## 🚀 Tecnologias
 
-- Expo (SDK)
-- React Native + TypeScript
-- Expo Router (navegação baseada em arquivos)
-- react-native-reanimated & react-native-worklets (animações e worklets)
-- Expo SQLite (armazenamento local)
-- NativeWind / Tailwind (estilização)
-- Lucide React Native / @expo/vector-icons
+### Core
+- **Expo SDK 54** - Framework principal
+- **React Native** - Framework mobile
+- **TypeScript** - Tipagem estática
+- **Expo Router** - Navegação baseada em arquivos
+
+### Banco de Dados
+- **Expo SQLite** - Banco local
+- **Migrations** automáticas
+- **Transações** para integridade
+
+### UI/UX
+- **Lucide React Native** - Ícones modernos
+- **React Native Reanimated** - Animações fluidas
+- **Custom Components** - Interface consistente
+- **Dark Theme** - Design profissional
+
+### Funcionalidades Avançadas
+- **Expo File System** - Gerenciamento de arquivos
+- **Expo Document Picker** - Seleção de arquivos
+- **Expo Sharing** - Compartilhamento de dados
+- **Expo Print** - Geração de PDF
+- **AsyncStorage** - Cache e sessões
 
 ---
 
-## 🛠️ Requisitos
+## 🛠️ Instalação
 
-- Node.js 18+
-- npm ou yarn
-- Expo CLI (opcional globalmente)
+### Requisitos
+- **Node.js 18+**
+- **npm** ou **yarn**
+- **Expo CLI** (opcional)
 
----
+### Quick Start
 
-## ⚡ Quick Start
+1. **Clone o repositório:**
+```bash
+git clone https://github.com/ddouglss/SaborDaVilaAppClean.git
+cd SaborDaVilaAppClean
+```
 
-1. Instale dependências:
-
+2. **Instale as dependências:**
 ```bash
 npm install
 # ou
-yarn
+yarn install
 ```
 
-2. Inicie o Metro (com cache limpo se necessário):
-
+3. **Inicie o servidor de desenvolvimento:**
 ```bash
-npx expo start -c
+npx expo start
+# ou com cache limpo
+npx expo start --clear
 ```
 
-3. Abra no dispositivo/emulador:
-
+4. **Execute em dispositivos:**
 ```bash
 # Android
 npx expo start --android
@@ -78,71 +140,176 @@ npx expo start --android
 # iOS
 npx expo start --ios
 
-# Web
+# Web (limitado)
 npx expo start --web
 ```
 
 ---
 
-## 📁 Estrutura principal
+## 📁 Arquitetura do Projeto
 
 ```
 src/
-├─ app/                 # Rotas e telas (Expo Router)
-|  ├─ tabs/             # Layouts e telas das abas
-|  |  ├─ _layout.tsx    # Tabs bottom (IOS)
-│  │  ├─ index.tsx      # Tela principal (Dashboard)
-│  │  ├─ sales.tsx      # Vendas
-│  │  └─ inventory.tsx  # Estoque  
-│  ├─ _layout.tsx       # Layout root: Drawer (Android)
-│  ├─ index.tsx         # Tela principal (Dashboard)   
-|  ├─ settings.tsx      # Placeholder simples
-├─ components/          # Componentes reutilizáveis (Header, Button, Card...)
-|   ├─ Button.tsx       # Componente de botão customizável com variantes, tamanhos e suporte a ícones
-|   ├─ Card.tsx         # Componente Card para exibir informações resumidas em um cartão estilizado 
-|   ├─ Header.tsx       # Componente Header que exibe o título da tela e um botão de menu no Android 
-|   ├─ Input.tsx        # Componente Input para campos de entrada de texto com estilo personalizado
-├─ database/            # Repositórios e inicialização do SQLite
-├─ assets/              # Imagens, screenshots, fontes
-└─ styles/              # Config global do styling
+├─ app/                     # 📱 Rotas e Telas (Expo Router)
+│  ├─ tabs/                 # 📋 Navegação por abas
+│  │  ├─ _layout.tsx        # Layout das abas (iOS)
+│  │  ├─ index.tsx          # 🏠 Dashboard
+│  │  ├─ sales.tsx          # 💰 Gestão de Vendas
+│  │  ├─ inventory.tsx      # 📦 Controle de Estoque
+│  │  ├─ my-shops.tsx       # 🏪 Minhas Lojas
+│  │  └─ DebugScreen.tsx    # 🛠️ Debug/Admin
+│  ├─ _layout.tsx           # Layout principal (Drawer Android)
+│  ├─ index.tsx             # Tela inicial
+│  ├─ login.tsx             # 🔐 Login
+│  ├─ register.tsx          # 📝 Cadastro
+│  ├─ settings.tsx          # ⚙️ Configurações
+│  └─ create-first-shop.tsx # 🏪 Primeira loja
+├─ components/              # 🧩 Componentes Reutilizáveis
+│  ├─ Button.tsx            # Botões customizáveis
+│  ├─ Card.tsx              # Cards informativos
+│  ├─ Header.tsx            # Cabeçalho com navegação
+│  └─ Input.tsx             # Campos de entrada
+├─ context/                 # 🌐 Contextos Globais
+│  └─ AuthContext.tsx       # Autenticação e estado
+├─ database/                # 🗃️ Camada de Dados
+│  ├─ database.ts           # Conexão SQLite
+│  ├─ authRepository.ts     # Usuários e lojas
+│  ├─ productRepository.ts  # Produtos
+│  ├─ salesRepository.ts    # Vendas
+│  └─ exportDatabase.ts     # Exportação de dados
+├─ services/                # ⚙️ Serviços de Negócio
+│  ├─ authService.ts        # Autenticação
+│  ├─ shopService.ts        # Gerenciamento de lojas
+│  ├─ adminService.ts       # 🛡️ Funcionalidades admin
+│  └─ reportService.ts      # 📊 Relatórios e exports
+├─ types/                   # 📋 Definições TypeScript
+│  ├─ auth.ts               # Tipos de autenticação
+│  └─ sales.ts              # Tipos de vendas
+├─ hooks/                   # 🎣 Hooks Customizados
+│  ├─ useDatabase.ts        # Hook do banco
+│  └─ useShopData.ts        # Dados da loja ativa
+├─ utils/                   # 🛠️ Utilitários
+│  └─ shopUtils.ts          # Funções auxiliares
+└─ assets/                  # 📁 Recursos Estáticos
+   └─ screenshots/          # Capturas de tela
 ```
 
 ---
 
-## ✅ Funcionalidades implementadas
+## 🎯 Principais Funcionalidades
 
-- Dashboard com resumo de vendas e ações rápidas
-- Registro e listagem de vendas
-- Gerenciamento de estoque (adicionar produto / controlar quantidade)
-- Navegação por plataforma (Drawer Android / Tabs iOS)
-- Header custom e Drawer com itens e ícones
+### 🔐 **Autenticação & Usuários**
+- [x] Sistema de registro com validação
+- [x] Login seguro com hash de senha
+- [x] Validação de CPF/CNPJ
+- [x] Sessões persistentes
+- [x] Sistema de roles (User/Admin)
+
+### 🏪 **Gestão Multi-Loja**
+- [x] Criação de múltiplas lojas
+- [x] Troca dinâmica entre lojas
+- [x] Isolamento completo de dados
+- [x] Gerenciamento de lojas ativas
+
+### 💼 **Vendas & Estoque**
+- [x] Registro rápido de vendas
+- [x] Controle automático de estoque
+- [x] Alertas de estoque baixo
+- [x] Histórico completo de vendas
+- [x] Dashboard com métricas em tempo real
+
+### 📊 **Relatórios & Exports**
+- [x] Relatórios PDF (vendas, estoque, produtos)
+- [x] Exportação para Excel (CSV)
+- [x] Estatísticas detalhadas
+- [x] Dados filtráveis por período
+
+### 🛡️ **Administração**
+- [x] Backup completo do banco de dados
+- [x] Restauração de backups
+- [x] Estatísticas do sistema
+- [x] Limpeza de dados de teste
+- [x] Gestão de usuários
 
 ---
 
-## � Notas de desenvolvimento
+## 🎨 Design & UX
 
-- Header: existe um `Header` custom (em `src/components/Header.tsx`) que mantém o título centralizado e mostra o ícone de menu no Android (abre o Drawer).
-- Navegação: para ir a uma screen de tab a partir do Drawer usamos `navigation.navigate('tabs', { screen: 'sales' })` (navegação aninhada).
-- Worklets / Reanimated: versões alinhadas para evitar mismatch entre parte JS e nativa; se houver erro de versão, rode `npx expo install react-native-worklets react-native-reanimated` e faça rebuild.
+### 🎨 **Tema Visual**
+- **Cores principais:** `#09090B`, `#18181B`, `#FFFFFF`
+- **Accent:** `#10B981` (verde)
+- **Secundárias:** `#A1A1AA`, `#71717A`
+- **Dark theme** moderno e profissional
+
+### 📱 **Responsividade**
+- Layout adaptativo para diferentes tamanhos
+- Navegação otimizada por plataforma
+- Componentes reutilizáveis e consistentes
 
 ---
 
-## ✔️ Scripts úteis
-
-No `package.json` existem scripts padrão do Expo:
+## 🔧 Scripts Disponíveis
 
 ```bash
-npm run start   # inicia o bundler
-npm run android # compila/emula no Android
-npm run ios     # compila/emula no iOS
-npm run web     # roda no navegador
+# Desenvolvimento
+npm run start           # Inicia o Metro Bundler
+npm run start:clear     # Inicia com cache limpo
+
+# Compilação
+npm run android         # Build/emula Android
+npm run ios             # Build/emula iOS
+npm run web             # Executa no navegador
+
+# Manutenção
+npx expo install        # Atualiza dependências do Expo
+npx expo doctor         # Diagnóstico do projeto
 ```
 
 ---
 
-## Contribuições
-- Douglas Souza Silva
-  - [Linkedin](https://www.linkedin.com/in/ddouglss/)
-- Andressa Bonfim de Araujo
-  - [Linkedin](https://www.linkedin.com/in/andressa-bonfim/)
+## 🚦 Status do Projeto
+
+### ✅ **Concluído**
+- Sistema de autenticação multi-usuário
+- Gestão completa de lojas
+- Controle de vendas e estoque
+- Dashboard com métricas em tempo real
+- Sistema administrativo
+- Relatórios e exportações
+- Interface adaptativa (Android/iOS)
+
+### 🔄 **Em Desenvolvimento**
+- Sincronização em nuvem
+- Notificações push
+- Análise avançada de dados
+- Sistema de backup automático
+
+---
+
+## 👨‍💻 Desenvolvedores
+
+**Douglas Souza Silva**
+- [LinkedIn](https://www.linkedin.com/in/ddouglss/)
+- [GitHub](https://github.com/ddouglss)
+
+**Andressa Bonfim de Araujo**
+- [LinkedIn](https://www.linkedin.com/in/andressa-bonfim/)
+
+---
+
+## 📄 Licença
+
+Este projeto é privado e proprietário da equipe **Sabor da Vila**.
+
+---
+
+## 🤝 Contribuições
+
+Este é um projeto proprietário. Para contribuições ou sugestões, entre em contato com a equipe de desenvolvimento.
+
+---
+
+<p align="center">
+  <strong>🍔 Sabor da Vila - Gerenciamento Profissional de Lanchonetes</strong>
+</p>
 

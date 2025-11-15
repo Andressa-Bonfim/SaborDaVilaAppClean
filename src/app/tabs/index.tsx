@@ -11,9 +11,11 @@ import { SalesSummary } from '../../types/sales';
 import { BarChart, Plus, Check, Download } from 'lucide-react-native';
 import { NETSIM_HOST, NETSIM_PORT } from '../../config/netsim';
 import { exportDatabase } from '../../database/exportDatabase';
+import { useAuth } from '../../context/AuthContext';
 
 
 export default function Index() {
+    const { user, activeShop, isAdmin } = useAuth();
   const [dailySales, setDailySales] = useState('R$ 0,00');
   const [itemsSold, setItemsSold] = useState('0 itens');
   const [weeklySummary, setWeeklySummary] = useState<SalesSummary>({
@@ -22,37 +24,58 @@ export default function Index() {
     avgTicket: 0,
   });
 
+  // Recarregar dados quando a loja ativa mudar
   useEffect(() => {
-  // const testNetsim = async () => {
-  //   const url = `http://${NETSIM_HOST}:${NETSIM_PORT}/ping`;
-  //   try {
-  //     const controller = new AbortController();
-  //     const id = setTimeout(() => controller.abort(), 5000);
-  //     await fetch(url, { signal: controller.signal });
-  //     console.log('✅ Conectado ao Netsim!');
-  //     clearTimeout(id);
-  //   } catch (err) {
-  //     console.warn('⚠️ Erro de conexão com Netsim (não bloqueante)', err);
-  //   }
-  // };
-  // testNetsim();
-}, []);
+    loadData();
+  }, [activeShop?.id]);
+
+  useEffect(() => {
+    // Inicialização do banco
+    const init = async () => {
+      try {
+        await initializeDatabase();
+        await initializeSalesTable();
+        console.log('✅ Dashboard: Banco inicializado');
+      } catch (error) {
+        console.error('❌ Dashboard: Erro ao inicializar banco:', error);
+      }
+    };
+    init();
+  }, [activeShop?.id]);
 
 
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
 
   const loadData = async () => {
-    const daily = await getDailySales();
-    const weekly = await getWeeklySummary();
+    if (!activeShop) {
+      console.warn('⚠️ Dashboard: Nenhuma loja ativa para carregar dados');
+      // Se não há loja ativa, mostrar dados zerados
+      setDailySales('R$ 0,00');
+      setItemsSold('0 itens');
+      setWeeklySummary({ total: 0, items: 0, avgTicket: 0 });
+      return;
+    }
 
-    setDailySales(`R$ ${(daily.total || 0).toFixed(2)}`);
-    setItemsSold(`${daily.items || 0} itens`);
-    setWeeklySummary({
-      total: weekly.total || 0,
-      items: weekly.items || 0,
-      avgTicket: weekly.avgTicket || 0,
-    });
+    console.log(`📊 Dashboard: Carregando dados da loja ${activeShop.id}`);
+
+    try {
+      const daily = await getDailySales(activeShop.id);
+      const weekly = await getWeeklySummary(activeShop.id);
+
+      setDailySales(`R$ ${(daily.total || 0).toFixed(2)}`);
+      setItemsSold(`${daily.items || 0} itens`);
+      setWeeklySummary({
+        total: weekly.total || 0,
+        items: weekly.items || 0,
+        avgTicket: weekly.avgTicket || 0,
+      });
+      
+      console.log('✅ Dashboard: Dados carregados com sucesso');
+    } catch (error) {
+      console.error('❌ Dashboard: Erro ao carregar dados:', error);
+      // Manter valores atuais em caso de erro
+    }
   };
 
   const onRefresh = async () => {
@@ -107,13 +130,15 @@ export default function Index() {
               size="large"
               icon={<Plus color="#3B82F6" size={20} />}
             />
-            <Button
-              title="Exportar Banco"
-              onPress={handleExportDatabase}
-              variant="secondary"
-              size="large"
-              icon={<Download color="#10B981" size={20} />}
-            />
+            {isAdmin && (
+              <Button
+                title="Exportar Banco"
+                onPress={handleExportDatabase}
+                variant="secondary"
+                size="large"
+                icon={<Download color="#10B981" size={20} />}
+              />
+            )}
           </View>
         </View>
 

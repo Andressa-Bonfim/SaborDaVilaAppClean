@@ -2,49 +2,42 @@
 
 export interface User {
   id: string;
-  nome: string;
-  sobrenome: string;
-  tipoDocumento: 'CPF' | 'CNPJ';
-  cpf?: string;
-  cnpj?: string;
+  nomeCompleto: string;
   email: string;
-  telefone: string;
+  tipoDocumento: 'cpf' | 'cnpj';
+  numeroDocumento: string;
   endereco: string;
-  senha: string; // hash
-  createdAt: string;
-  updatedAt: string;
+  userRole: 'user' | 'admin';
+  senhaHash: string;
+  dataCriacao: Date;
 }
 
 export interface Shop {
   id: string;
   ownerId: string;
   nomeDaLoja: string;
-  createdAt: string;
-  updatedAt: string;
+  dataCriacao: Date;
 }
 
 export interface AuthUser {
   id: string;
-  nome: string;
-  sobrenome: string;
+  nomeCompleto: string;
   email: string;
-  tipoDocumento: 'CPF' | 'CNPJ';
-  cpf?: string;
-  cnpj?: string;
-  telefone: string;
+  tipoDocumento: 'cpf' | 'cnpj';
+  numeroDocumento: string;
   endereco: string;
+  userRole: 'user' | 'admin';
+  dataCriacao: Date;
 }
 
-export interface CreateUserRequest {
-  nome: string;
-  sobrenome: string;
-  tipoDocumento: 'CPF' | 'CNPJ';
-  cpf?: string;
-  cnpj?: string;
+export interface RegisterRequest {
+  nomeCompleto: string;
   email: string;
-  telefone: string;
-  endereco: string;
   senha: string;
+  tipoDocumento: 'cpf' | 'cnpj';
+  numeroDocumento: string;
+  endereco: string;
+  userRole?: 'user' | 'admin';
 }
 
 export interface LoginRequest {
@@ -54,4 +47,18 @@ export interface LoginRequest {
 
 export interface CreateShopRequest {
   nomeDaLoja: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  message: string;
+  user?: AuthUser;
+  hasShops?: boolean;
+}
+
+export interface ShopResponse {
+  success: boolean;
+  message: string;
+  shop?: Shop;
+  shops?: Shop[];
 }

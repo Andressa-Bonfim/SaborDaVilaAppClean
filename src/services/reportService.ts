@@ -5,6 +5,11 @@ import { Alert } from 'react-native';
 import { getRecentSales } from '../database/salesRepository';
 import { getProductRepository } from '../database/productRepository';
 
+// Função auxiliar para obter shopId (será passado como parâmetro)
+interface ReportParams {
+  shopId: string;
+}
+
 // Tipos para os dados dos relatórios
 interface SalesReportData {
   id: number;
@@ -45,9 +50,16 @@ const formatCurrency = (value: number): string => {
 };
 
 // Gerar relatório de vendas em PDF
-export async function generateSalesReportPDF(): Promise<void> {
+export async function generateSalesReportPDF(shopId?: string): Promise<void> {
   try {
-    const sales = await getRecentSales();
+    console.log('🔄 Iniciando geração de relatório PDF de vendas...');
+    
+    if (!shopId) {
+      Alert.alert('Erro', 'Nenhuma loja ativa encontrada.');
+      return;
+    }
+    
+    const sales = await getRecentSales(shopId);
     
     if (sales.length === 0) {
       Alert.alert('Aviso', 'Não há vendas para gerar o relatório.');
@@ -136,12 +148,25 @@ export async function generateSalesReportPDF(): Promise<void> {
 }
 
 // Gerar relatório de estoque em PDF
-export async function generateInventoryReportPDF(): Promise<void> {
+export async function generateInventoryReportPDF(shopId?: string): Promise<void> {
   try {
+    console.log('🔄 Iniciando geração de relatório PDF de estoque...');
+    console.log('🏪 ShopId recebido:', shopId);
+    
+    if (!shopId) {
+      console.error('❌ ShopId não fornecido');
+      Alert.alert('Erro', 'Nenhuma loja ativa encontrada.');
+      return;
+    }
+    
+    console.log('📦 Obtendo produtos do repositório...');
     const productRepo = await getProductRepository();
-    const products = await productRepo.getAll();
+    const products = await productRepo.getAll(shopId);
+    
+    console.log(`📊 Produtos encontrados: ${products.length}`);
     
     if (products.length === 0) {
+      console.warn('⚠️ Nenhum produto encontrado para a loja');
       Alert.alert('Aviso', 'Não há produtos para gerar o relatório.');
       return;
     }
@@ -149,35 +174,80 @@ export async function generateInventoryReportPDF(): Promise<void> {
     // Calcular totais
     const totalValue = products.reduce((sum, product) => sum + (product.stock * product.price), 0);
     const totalItems = products.reduce((sum, product) => sum + product.stock, 0);
+    
+    console.log(`💰 Valor total: ${totalValue}, Itens: ${totalItems}`);
 
     // Gerar HTML para o PDF
     const htmlContent = `
+    <!DOCTYPE html>
     <html>
     <head>
+      <meta charset="UTF-8">
+      <title>Relatório de Estoque</title>
       <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .header { text-align: center; color: #333; margin-bottom: 30px; }
-        .summary { background-color: #f5f5f5; padding: 15px; margin-bottom: 20px; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #FF6B35; color: white; }
-        tr:nth-child(even) { background-color: #f2f2f2; }
-        .total { font-weight: bold; background-color: #ffe8e1; }
-        .low-stock { background-color: #ffebee; color: #c62828; }
+        body { 
+          font-family: Arial, sans-serif; 
+          margin: 20px; 
+          color: #333;
+        }
+        .header { 
+          text-align: center; 
+          color: #333; 
+          margin-bottom: 30px; 
+          border-bottom: 2px solid #10B981;
+          padding-bottom: 20px;
+        }
+        .summary { 
+          background-color: #f5f5f5; 
+          padding: 15px; 
+          margin-bottom: 20px; 
+          border-radius: 8px;
+          border-left: 4px solid #10B981;
+        }
+        table { 
+          width: 100%; 
+          border-collapse: collapse; 
+          margin-top: 20px; 
+        }
+        th, td { 
+          border: 1px solid #ddd; 
+          padding: 10px; 
+          text-align: left; 
+        }
+        th { 
+          background-color: #10B981; 
+          color: white; 
+          font-weight: bold;
+        }
+        tr:nth-child(even) { 
+          background-color: #f9f9f9; 
+        }
+        .total { 
+          font-weight: bold; 
+          background-color: #e8f5e8; 
+        }
+        .low-stock { 
+          background-color: #ffebee; 
+          color: #c62828; 
+        }
+        .value-cell {
+          text-align: right;
+        }
       </style>
     </head>
     <body>
       <div class="header">
-        <h1>Sabor da Vila</h1>
-        <h2>Relatório de Estoque</h2>
-        <p>Gerado em: ${formatDate(new Date())}</p>
+        <h1>🏪 Sabor da Vila</h1>
+        <h2>📦 Relatório de Estoque</h2>
+        <p>📅 Gerado em: ${formatDate(new Date())}</p>
+        <p>🆔 Loja ID: ${shopId}</p>
       </div>
       
       <div class="summary">
-        <h3>Resumo</h3>
-        <p><strong>Valor Total do Estoque:</strong> ${formatCurrency(totalValue)}</p>
-        <p><strong>Total de Itens em Estoque:</strong> ${totalItems}</p>
-        <p><strong>Número de Produtos:</strong> ${products.length}</p>
+        <h3>📊 Resumo do Estoque</h3>
+        <p><strong>💰 Valor Total do Estoque:</strong> ${formatCurrency(totalValue)}</p>
+        <p><strong>📦 Total de Itens em Estoque:</strong> ${totalItems}</p>
+        <p><strong>🔢 Número de Produtos:</strong> ${products.length}</p>
       </div>
 
       <table>
@@ -185,7 +255,7 @@ export async function generateInventoryReportPDF(): Promise<void> {
           <tr>
             <th>Produto</th>
             <th>Estoque</th>
-            <th>Preço Unit.</th>
+            <th>Preço Unitário</th>
             <th>Valor Total</th>
             <th>Status</th>
           </tr>
@@ -194,17 +264,17 @@ export async function generateInventoryReportPDF(): Promise<void> {
           ${products.map(product => `
             <tr ${product.stock <= 5 ? 'class="low-stock"' : ''}>
               <td>${product.name}</td>
-              <td>${product.stock}</td>
-              <td>${formatCurrency(product.price)}</td>
-              <td>${formatCurrency(product.stock * product.price)}</td>
-              <td>${product.stock <= 5 ? '⚠️ Estoque Baixo' : '✅ OK'}</td>
+              <td class="value-cell">${product.stock}</td>
+              <td class="value-cell">${formatCurrency(product.price)}</td>
+              <td class="value-cell">${formatCurrency(product.stock * product.price)}</td>
+              <td>${product.stock <= product.minQuantity ? '⚠️ Estoque Baixo' : '✅ OK'}</td>
             </tr>
           `).join('')}
           <tr class="total">
             <td><strong>TOTAL GERAL</strong></td>
-            <td><strong>${totalItems}</strong></td>
+            <td class="value-cell"><strong>${totalItems}</strong></td>
             <td>-</td>
-            <td><strong>${formatCurrency(totalValue)}</strong></td>
+            <td class="value-cell"><strong>${formatCurrency(totalValue)}</strong></td>
             <td>-</td>
           </tr>
         </tbody>
@@ -212,28 +282,50 @@ export async function generateInventoryReportPDF(): Promise<void> {
     </body>
     </html>`;
 
+    console.log('📄 HTML gerado, iniciando criação do PDF...');
+
     // Gerar PDF
     const { uri } = await Print.printToFileAsync({
       html: htmlContent,
       base64: false,
     });
 
+    console.log('✅ PDF gerado com sucesso:', uri);
+    
+    // Verificar se o arquivo foi criado
+    const fileInfo = await FileSystem.getInfoAsync(uri);
+    if (!fileInfo.exists) {
+      throw new Error('Arquivo PDF não foi criado');
+    }
+    
+    console.log('📱 Iniciando compartilhamento...');
+
     // Compartilhar PDF
     await Sharing.shareAsync(uri, {
       mimeType: 'application/pdf',
       dialogTitle: 'Compartilhar Relatório de Estoque',
     });
+    
+    console.log('🎉 Compartilhamento concluído com sucesso');
 
   } catch (error) {
-    console.error('Erro ao gerar relatório de estoque:', error);
-    Alert.alert('Erro', 'Não foi possível gerar o relatório de estoque.');
+    console.error('❌ Erro ao gerar relatório de estoque:', error);
+    Alert.alert(
+      'Erro', 
+      `Não foi possível gerar o relatório de estoque.\n\nDetalhes: ${error instanceof Error ? error.message : 'Erro desconhecido'}`
+    );
   }
 }
 
 // Gerar relatório de vendas por produto em PDF
-export async function generateSalesProductReportPDF(): Promise<void> {
+export async function generateSalesProductReportPDF(shopId?: string): Promise<void> {
   try {
-    const sales = await getRecentSales();
+    if (!shopId) {
+      Alert.alert('Erro', 'Nenhuma loja ativa encontrada.');
+      return;
+    }
+    
+    const sales = await getRecentSales(shopId);
     
     if (sales.length === 0) {
       Alert.alert('Aviso', 'Não há vendas para gerar o relatório.');
@@ -353,9 +445,16 @@ export async function generateSalesProductReportPDF(): Promise<void> {
 }
 
 // Gerar dados CSV para Excel (vendas)
-export async function generateSalesExcelData(): Promise<void> {
+export async function generateSalesExcelData(shopId?: string): Promise<void> {
   try {
-    const sales = await getRecentSales();
+    console.log('🔄 Iniciando geração de dados CSV de vendas...');
+    
+    if (!shopId) {
+      Alert.alert('Erro', 'Nenhuma loja ativa encontrada.');
+      return;
+    }
+    
+    const sales = await getRecentSales(shopId);
     
     if (sales.length === 0) {
       Alert.alert('Aviso', 'Não há vendas para gerar o arquivo Excel.');
@@ -392,41 +491,84 @@ export async function generateSalesExcelData(): Promise<void> {
 }
 
 // Gerar dados CSV para Excel (estoque)
-export async function generateInventoryExcelData(): Promise<void> {
+export async function generateInventoryExcelData(shopId?: string): Promise<void> {
   try {
+    console.log('🔄 Iniciando geração de dados CSV de estoque...');
+    console.log('🏪 ShopId recebido:', shopId);
+    
+    if (!shopId) {
+      console.error('❌ ShopId não fornecido');
+      Alert.alert('Erro', 'Nenhuma loja ativa encontrada.');
+      return;
+    }
+    
+    console.log('📦 Obtendo produtos do repositório...');
     const productRepo = await getProductRepository();
-    const products = await productRepo.getAll();
+    const products = await productRepo.getAll(shopId);
+    
+    console.log(`📊 Produtos encontrados: ${products.length}`);
     
     if (products.length === 0) {
+      console.warn('⚠️ Nenhum produto encontrado para a loja');
       Alert.alert('Aviso', 'Não há produtos para gerar o arquivo Excel.');
       return;
     }
 
-    // Criar cabeçalho CSV
+    // Criar cabeçalho CSV com BOM UTF-8 para Excel
+    const BOM = '\uFEFF'; // Byte Order Mark para UTF-8
     const csvHeader = 'Produto,Estoque,Preço Unitário,Valor Total,Status\n';
     
+    console.log('📝 Gerando dados CSV...');
+    
     // Criar linhas de dados
-    const csvData = products.map(product => 
-      `"${product.name}",${product.stock},"${formatCurrency(product.price)}","${formatCurrency(product.stock * product.price)}","${product.stock <= 5 ? 'Estoque Baixo' : 'OK'}"`
-    ).join('\n');
+    const csvData = products.map(product => {
+      const productName = `"${product.name.replace(/"/g, '""')}"`;
+      const stock = product.stock.toString();
+      const price = `"${formatCurrency(product.price)}"`;
+      const totalValue = `"${formatCurrency(product.stock * product.price)}"`;
+      const status = `"${product.stock <= product.minQuantity ? 'Estoque Baixo' : 'OK'}"`;
+      
+      return `${productName},${stock},${price},${totalValue},${status}`;
+    }).join('\n');
 
-    // Combinar cabeçalho e dados
-    const csvContent = csvHeader + csvData;
+    // Combinar BOM + cabeçalho + dados
+    const csvContent = BOM + csvHeader + csvData;
 
+    console.log('💾 Salvando arquivo CSV...');
+    
     // Salvar arquivo
-    const fileName = `estoque_${new Date().toISOString().split('T')[0]}.csv`;
+    const timestamp = new Date().toISOString().split('T')[0];
+    const fileName = `estoque_loja_${shopId}_${timestamp}.csv`;
     const fileUri = `${FileSystem.documentDirectory}${fileName}`;
     
-    await FileSystem.writeAsStringAsync(fileUri, csvContent);
+    await FileSystem.writeAsStringAsync(fileUri, csvContent, {
+      encoding: FileSystem.EncodingType.UTF8,
+    });
+    
+    console.log('📁 Arquivo salvo em:', fileUri);
+    
+    // Verificar se o arquivo foi criado
+    const fileInfo = await FileSystem.getInfoAsync(fileUri);
+    if (!fileInfo.exists) {
+      throw new Error('Arquivo CSV não foi criado');
+    }
+    
+    console.log(`📏 Tamanho do arquivo: ${fileInfo.size} bytes`);
+    console.log('📱 Iniciando compartilhamento...');
 
     // Compartilhar arquivo
     await Sharing.shareAsync(fileUri, {
       mimeType: 'text/csv',
       dialogTitle: 'Compartilhar Dados de Estoque (Excel)',
     });
+    
+    console.log('🎉 Compartilhamento concluído com sucesso');
 
   } catch (error) {
-    console.error('Erro ao gerar dados Excel:', error);
-    Alert.alert('Erro', 'Não foi possível gerar o arquivo Excel.');
+    console.error('❌ Erro ao gerar dados Excel:', error);
+    Alert.alert(
+      'Erro', 
+      `Não foi possível gerar o arquivo Excel.\n\nDetalhes: ${error instanceof Error ? error.message : 'Erro desconhecido'}`
+    );
   }
 }

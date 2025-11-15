@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 import { Slot, Tabs } from 'expo-router';
-import { Home, ShoppingCart, Archive, Settings } from 'lucide-react-native';
+import { Home, ShoppingCart, Archive, Settings, Building } from 'lucide-react-native';
 
 export default function TabsLayout() {
   if (Platform.OS === 'android') {
@@ -51,9 +51,18 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="my-shops"
+        options={{
+          title: 'Lojas',
+          tabBarIcon: ({ color, size }) => (
+            <Building color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="DebugScreen"
         options={{
-          title: 'Debug',
+          title: 'Settings',
           tabBarIcon: ({ color, size }) => (
             <Settings color={color} size={size} />
           ),

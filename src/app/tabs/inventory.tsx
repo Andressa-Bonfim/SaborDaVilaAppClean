@@ -12,42 +12,67 @@ import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
 import { Header } from '../../components/Header';
 import { StatusBar } from 'expo-status-bar';
+import { useAuth } from '../../context/AuthContext';
 
 import { initializeDatabase } from '../../database/database';
-import {
-  getAllProducts,
-  insertProduct,
-  updateProduct,
-  deleteProduct,
-} from '../../database/productRepository';
+import { getProductRepository } from '../../database/productRepository';
 import { Edit, Trash2, Plus } from 'lucide-react-native';
 
 
 export default function Inventory() {
+  const { activeShop } = useAuth();
   const [products, setProducts] = useState<any[]>([]);
   const [newProductName, setNewProductName] = useState('');
   const [newProductQuantity, setNewProductQuantity] = useState('');
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
 
-  useEffect(() => {
+  // Função para carregar produtos
+  const loadProducts = async () => {
+    if (!activeShop?.id) {
+      console.warn('⚠️ Estoque: Nenhuma loja ativa para carregar produtos');
+      setProducts([]);
+      return;
+    }
+
     if (Platform.OS === 'web') {
-      console.warn('⚠️ SQLite não é suportado no navegador. Usando mock.');
+      console.warn('⚠️ SQLite não é suportado no navegador.');
       setProducts([]);
       return;
     }
 
     try {
-      initializeDatabase();
-      setProducts(getAllProducts());
+      console.log(`📦 Estoque: Carregando produtos da loja ${activeShop.id}`);
+      const productRepo = await getProductRepository();
+      const shopProducts = await productRepo.getAll(activeShop.id);
+      setProducts(shopProducts);
+      console.log(`✅ Estoque: ${shopProducts.length} produtos carregados`);
     } catch (error) {
-      console.error('Erro ao inicializar banco:', error);
+      console.error('❌ Estoque: Erro ao carregar produtos:', error);
+      setProducts([]);
     }
-  }, []);
+  };
 
-  const handleSaveProduct = () => {
+  useEffect(() => {
+    const init = async () => {
+      try {
+        await initializeDatabase();
+        await loadProducts();
+      } catch (error) {
+        console.error('❌ Estoque: Erro ao inicializar:', error);
+      }
+    };
+    init();
+  }, [activeShop?.id]);
+
+  const handleSaveProduct = async () => {
     if (!newProductName.trim() || !newProductQuantity.trim()) {
       Alert.alert('Erro', 'Preencha todos os campos');
+      return;
+    }
+
+    if (!activeShop?.id) {
+      Alert.alert('Erro', 'Nenhuma loja ativa selecionada.');
       return;
     }
 
@@ -55,6 +80,9 @@ export default function Inventory() {
       name: newProductName.trim(),
       quantity: parseInt(newProductQuantity),
       minQuantity: 5,
+      shopId: activeShop.id,
+      stock: parseInt(newProductQuantity),
+      price: 0, // Valor padrão, pode ser editado depois
     };
 
     if (Platform.OS === 'web') {
@@ -63,18 +91,24 @@ export default function Inventory() {
     }
 
     try {
+      console.log(`💾 Estoque: Salvando produto na loja ${activeShop.id}`);
+      const productRepo = await getProductRepository();
+      
       if (editingProduct) {
-        updateProduct(editingProduct.id, productData);
+        await productRepo.update(editingProduct.id, productData);
         Alert.alert('Sucesso', 'Produto atualizado!');
+        console.log('✅ Estoque: Produto atualizado com sucesso');
       } else {
-        insertProduct(productData);
+        await productRepo.insert(productData);
         Alert.alert('Sucesso', 'Produto adicionado!');
+        console.log('✅ Estoque: Produto adicionado com sucesso');
       }
 
-      setProducts(getAllProducts());
+      await loadProducts(); // Recarregar lista
       resetForm();
     } catch (error) {
-      console.error('Erro ao salvar produto:', error);
+      console.error('❌ Estoque: Erro ao salvar produto:', error);
+      Alert.alert('Erro', 'Falha ao salvar produto. Tente novamente.');
     }
   };
 
@@ -84,13 +118,21 @@ export default function Inventory() {
       {
         text: 'Excluir',
         style: 'destructive',
-        onPress: () => {
+        onPress: async () => {
+          if (!activeShop?.id) {
+            console.warn('⚠️ Estoque: Nenhuma loja ativa para deletar produto');
+            return;
+          }
+
           try {
-            deleteProduct(id);
-            setProducts(getAllProducts());
+            console.log(`🗑️ Estoque: Deletando produto ${id} da loja ${activeShop.id}`);
+            const productRepo = await getProductRepository();
+            await productRepo.delete(id);
+            await loadProducts(); // Recarregar lista
             Alert.alert('Removido', 'Produto excluído com sucesso.');
+            console.log('✅ Estoque: Produto deletado com sucesso');
           } catch (error) {
-            console.error('Erro ao excluir produto:', error);
+            console.error('❌ Estoque: Erro ao excluir produto:', error);
           }
         },
       },

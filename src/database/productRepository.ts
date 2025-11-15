@@ -6,12 +6,14 @@ export interface Product {
   stock: number;
   price: number;
   minQuantity: number;
+  shopId: string;
+  dateCreated?: string;
 }
 
 export interface ProductRepository {
-  getAll: () => Promise<Product[]>;
-  insert: (product: Omit<Product, 'id'>) => Promise<void>;
-  update: (id: number, product: Omit<Product, 'id'>) => Promise<void>;
+  getAll: (shopId: string) => Promise<Product[]>;
+  insert: (product: Omit<Product, 'id' | 'dateCreated'>) => Promise<void>;
+  update: (id: number, product: Partial<Omit<Product, 'id' | 'shopId' | 'dateCreated'>>) => Promise<void>;
   delete: (id: number) => Promise<void>;
 }
 
@@ -20,9 +22,9 @@ export async function getProductRepository(): Promise<ProductRepository> {
   await initializeProductsTable();
 
   return {
-    getAll: async () => {
+    getAll: async (shopId: string) => {
       try {
-        const result = db.getAllSync('SELECT * FROM products ORDER BY id DESC;');
+        const result = db.getAllSync('SELECT * FROM products WHERE shopId = ? ORDER BY id DESC;', [shopId]);
         return result as Product[];
       } catch (error) {
         console.error('Erro ao buscar produtos:', error);
@@ -33,8 +35,8 @@ export async function getProductRepository(): Promise<ProductRepository> {
     insert: async (product) => {
       try {
         db.runSync(
-          'INSERT INTO products (name, stock, price, minQuantity) VALUES (?, ?, ?, ?);',
-          [product.name, product.stock, product.price, product.minQuantity]
+          'INSERT INTO products (name, stock, price, minQuantity, shopId) VALUES (?, ?, ?, ?, ?);',
+          [product.name, product.stock, product.price, product.minQuantity, product.shopId]
         );
       } catch (error) {
         console.error('Erro ao inserir produto:', error);
@@ -44,10 +46,31 @@ export async function getProductRepository(): Promise<ProductRepository> {
 
     update: async (id, product) => {
       try {
-        db.runSync(
-          'UPDATE products SET name = ?, stock = ?, price = ?, minQuantity = ? WHERE id = ?;',
-          [product.name, product.stock, product.price, product.minQuantity, id]
-        );
+        const updates: string[] = [];
+        const values: any[] = [];
+
+        if (product.name !== undefined) {
+          updates.push('name = ?');
+          values.push(product.name);
+        }
+        if (product.stock !== undefined) {
+          updates.push('stock = ?');
+          values.push(product.stock);
+        }
+        if (product.price !== undefined) {
+          updates.push('price = ?');
+          values.push(product.price);
+        }
+        if (product.minQuantity !== undefined) {
+          updates.push('minQuantity = ?');
+          values.push(product.minQuantity);
+        }
+
+        if (updates.length === 0) return;
+
+        values.push(id);
+        const query = `UPDATE products SET ${updates.join(', ')} WHERE id = ?`;
+        db.runSync(query, values);
       } catch (error) {
         console.error('Erro ao atualizar produto:', error);
         throw error;
