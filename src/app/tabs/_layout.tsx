@@ -1,10 +1,19 @@
 import { Platform } from 'react-native';
-import { Slot, Tabs } from 'expo-router';
-import { Home, ShoppingCart, Archive, Settings, Building } from 'lucide-react-native';
+import { Slot, Tabs, Stack } from 'expo-router';
+import { Home, ShoppingCart, Archive, Settings, Building, BarChart3 } from 'lucide-react-native';
 
 export default function TabsLayout() {
   if (Platform.OS === 'android') {
-    return <Slot />;
+    return (
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="dashboard" />
+        <Stack.Screen name="sales" />
+        <Stack.Screen name="inventory" />
+        <Stack.Screen name="my-shops" />
+        <Stack.Screen name="DebugScreen" />
+      </Stack>
+    );
   }
 
   return (
@@ -28,8 +37,15 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Dashboard',
+          title: 'Home',
           tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="dashboard"
+        options={{
+          title: 'Dashboard',
+          tabBarIcon: ({ color, size }) => <BarChart3 color={color} size={size} />,
         }}
       />
       <Tabs.Screen

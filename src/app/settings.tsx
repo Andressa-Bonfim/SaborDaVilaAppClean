@@ -15,6 +15,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { Header } from '../components/Header';
 import { Shop } from '../types/auth';
+import { seedDatabase, clearSampleData } from '../database/seedData';
 
 export default function Settings() {
   const { user, activeShop, getUserShops, switchShop, createShop, logout } = useAuth();
@@ -90,6 +91,61 @@ export default function Settings() {
           text: 'Sair',
           style: 'destructive',
           onPress: logout
+        }
+      ]
+    );
+  };
+
+  const handleSeedData = async () => {
+    if (!activeShop?.id) {
+      Alert.alert('Erro', 'Nenhuma loja ativa selecionada');
+      return;
+    }
+
+    Alert.alert(
+      'Dados de Exemplo',
+      'Deseja adicionar dados de exemplo para demonstração?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Adicionar',
+          onPress: async () => {
+            try {
+              await seedDatabase(activeShop.id);
+              Alert.alert('Sucesso', 'Dados de exemplo adicionados com sucesso!');
+            } catch (error) {
+              console.error('Erro ao popular dados:', error);
+              Alert.alert('Erro', 'Não foi possível adicionar dados de exemplo');
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const handleClearData = async () => {
+    if (!activeShop?.id) {
+      Alert.alert('Erro', 'Nenhuma loja ativa selecionada');
+      return;
+    }
+
+    Alert.alert(
+      'Limpar Dados',
+      'Deseja remover todos os dados de exemplo? Esta ação não pode ser desfeita.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Limpar',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await clearSampleData(activeShop.id);
+              Alert.alert('Sucesso', 'Dados removidos com sucesso!');
+            } catch (error) {
+              console.error('Erro ao limpar dados:', error);
+              Alert.alert('Erro', 'Não foi possível remover os dados');
+            }
+          }
         }
       ]
     );
@@ -172,6 +228,24 @@ export default function Settings() {
         {/* Actions Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Ações</Text>
+          
+          {activeShop && (
+            <>
+              <TouchableOpacity style={styles.actionButton} onPress={handleSeedData}>
+                <MaterialIcons name="dataset" size={20} color="#10B981" />
+                <Text style={[styles.actionButtonText, { color: '#10B981' }]}>
+                  Adicionar Dados de Exemplo
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.actionButton} onPress={handleClearData}>
+                <MaterialIcons name="clear-all" size={20} color="#F59E0B" />
+                <Text style={[styles.actionButtonText, { color: '#F59E0B' }]}>
+                  Limpar Dados de Exemplo
+                </Text>
+              </TouchableOpacity>
+            </>
+          )}
           
           <TouchableOpacity style={styles.actionButton} onPress={handleLogout}>
             <MaterialIcons name="logout" size={20} color="#EF4444" />

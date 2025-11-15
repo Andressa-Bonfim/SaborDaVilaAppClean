@@ -101,7 +101,7 @@ export default function Index() {
   return (
     <View style={styles.container}>
       <StatusBar translucent style="light" />
-      <Header title="Dashboard" />
+      <Header title="Home" />
 
       <ScrollView
         style={styles.scrollView}

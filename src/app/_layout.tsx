@@ -3,10 +3,11 @@ import React from 'react';
 import { Platform } from 'react-native';
 import { Slot, Stack } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
-import { MaterialIcons } from '@expo/vector-icons';
 import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import { Text, TouchableOpacity, View, Alert } from 'react-native';
 import { AuthProvider, useAuth } from '../context/AuthContext';
+import { AndroidDiagnostic } from '../components/AndroidDiagnostic';
+import { Home, BarChart3, ShoppingCart, Archive, Building, Settings, LogOut, MapPin, Menu, Bug } from 'lucide-react-native';
 
 function CustomDrawerContent(props: any) {
   const { logout, user, activeShop } = useAuth();
@@ -34,43 +35,67 @@ function CustomDrawerContent(props: any) {
           {user?.nomeCompleto}
         </Text>
         {activeShop && (
-          <Text style={{ color: '#9CA3AF', fontSize: 14, marginTop: 4 }}>
-            📍 {activeShop.nomeDaLoja}
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
+            <MapPin size={14} color="#9CA3AF" />
+            <Text style={{ color: '#9CA3AF', fontSize: 14, marginLeft: 6 }}>
+              {activeShop.nomeDaLoja}
+            </Text>
+          </View>
         )}
       </View>
 
       {/* Menu Items */}
-      <Text style={{ color: '#fff', padding: 16, fontWeight: '700' }}>Menu</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', padding: 16 }}>
+        <Menu size={18} color="#fff" />
+        <Text style={{ color: '#fff', marginLeft: 8, fontWeight: '700', fontSize: 16 }}>Menu Principal</Text>
+      </View>
+      
       <DrawerItem
-        label="Painel Principal"
-        labelStyle={{ color: '#fff' }}
-        icon={({ color, size }) => <MaterialIcons name="dashboard" color={color} size={size} />}
+        label="Home"
+        labelStyle={{ color: '#fff', fontSize: 16, fontWeight: '500' }}
+        icon={({ color, size }) => <Home color={color} size={size} />}
         onPress={() => props.navigation.navigate('tabs', { screen: 'index' })}
+        style={{ marginVertical: 2 }}
       />
+      
       <DrawerItem
-        label="Minhas Lojas"
-        labelStyle={{ color: '#fff' }}
-        icon={({ color, size }) => <MaterialIcons name="store" color={color} size={size} />}
-        onPress={() => props.navigation.navigate('tabs', { screen: 'my-shops' })}
+        label="Dashboard"
+        labelStyle={{ color: '#fff', fontSize: 16, fontWeight: '500' }}
+        icon={({ color, size }) => <BarChart3 color={color} size={size} />}
+        onPress={() => props.navigation.navigate('tabs', { screen: 'dashboard' })}
+        style={{ marginVertical: 2 }}
       />
+      
       <DrawerItem
         label="Vendas"
-        labelStyle={{ color: '#fff' }}
-        icon={({ color, size }) => <MaterialIcons name="shopping-cart" color={color} size={size} />}
+        labelStyle={{ color: '#fff', fontSize: 16, fontWeight: '500' }}
+        icon={({ color, size }) => <ShoppingCart color={color} size={size} />}
         onPress={() => props.navigation.navigate('tabs', { screen: 'sales' })}
+        style={{ marginVertical: 2 }}
       />
+      
       <DrawerItem
         label="Estoque"
-        labelStyle={{ color: '#fff' }}
-        icon={({ color, size }) => <MaterialIcons name="inventory" color={color} size={size} />}
+        labelStyle={{ color: '#fff', fontSize: 16, fontWeight: '500' }}
+        icon={({ color, size }) => <Archive color={color} size={size} />}
         onPress={() => props.navigation.navigate('tabs', { screen: 'inventory' })}
+        style={{ marginVertical: 2 }}
       />
+      
       <DrawerItem
-        label="Settings"
-        labelStyle={{ color: '#fff' }}
-        icon={({ color, size }) => <MaterialIcons name="bug-report" color={color} size={size} />}
+        label="Minhas Lojas"
+        labelStyle={{ color: '#fff', fontSize: 16, fontWeight: '500' }}
+        icon={({ color, size }) => <Building color={color} size={size} />}
+        onPress={() => props.navigation.navigate('tabs', { screen: 'my-shops' })}
+        style={{ marginVertical: 2 }}
+      />
+      
+      <DrawerItem
+        label="Configurações"
+        labelStyle={{ color: '#fff', fontSize: 16, fontWeight: '500' }}
+        icon={({ color, size }) => <Settings color={color} size={size} />}
         onPress={() => props.navigation.navigate('tabs', { screen: 'DebugScreen' })}
+        style={{ marginVertical: 2 }}
       />
 
       {/* Logout */}
@@ -79,14 +104,15 @@ function CustomDrawerContent(props: any) {
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            padding: 12,
+            padding: 16,
             backgroundColor: '#DC2626',
-            borderRadius: 8
+            borderRadius: 12,
+            marginTop: 20
           }}
           onPress={handleLogout}
         >
-          <MaterialIcons name="logout" size={20} color="#fff" />
-          <Text style={{ color: '#fff', marginLeft: 8, fontWeight: '600' }}>Sair</Text>
+          <LogOut size={22} color="#fff" />
+          <Text style={{ color: '#fff', marginLeft: 12, fontWeight: '600', fontSize: 16 }}>Sair da Conta</Text>
         </TouchableOpacity>
       </View>
     </DrawerContentScrollView>
@@ -108,6 +134,7 @@ function NavigationLayout() {
         <Stack.Screen name="login" />
         <Stack.Screen name="register" />
         <Stack.Screen name="create-first-shop" />
+        <Stack.Screen name="index" />
       </Stack>
     );
   }
@@ -143,6 +170,7 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <NavigationLayout />
+      {Platform.OS === 'android' && <AndroidDiagnostic />}
     </AuthProvider>
   );
 }

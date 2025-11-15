@@ -4,7 +4,9 @@ export interface Product {
   id: number;
   name: string;
   stock: number;
+  quantity?: number; // Alias para stock (compatibilidade)
   price: number;
+  costPrice?: number; // Valor de entrada/custo
   minQuantity: number;
   shopId: string;
   dateCreated?: string;
@@ -24,8 +26,12 @@ export async function getProductRepository(): Promise<ProductRepository> {
   return {
     getAll: async (shopId: string) => {
       try {
-        const result = db.getAllSync('SELECT * FROM products WHERE shopId = ? ORDER BY id DESC;', [shopId]);
-        return result as Product[];
+        const result = db.getAllSync('SELECT * FROM products WHERE shopId = ? ORDER BY id DESC;', [shopId]) as any[];
+        // Mapear stock para quantity para compatibilidade
+        return result.map(product => ({
+          ...product,
+          quantity: product.stock || product.quantity || 0
+        })) as Product[];
       } catch (error) {
         console.error('Erro ao buscar produtos:', error);
         return [];
@@ -34,12 +40,16 @@ export async function getProductRepository(): Promise<ProductRepository> {
 
     insert: async (product) => {
       try {
+        // Verificar se a tabela tem costPrice
+        await ensureTableStructure();
+        
         db.runSync(
-          'INSERT INTO products (name, stock, price, minQuantity, shopId) VALUES (?, ?, ?, ?, ?);',
-          [product.name, product.stock, product.price, product.minQuantity, product.shopId]
+          'INSERT INTO products (name, stock, price, costPrice, minQuantity, shopId) VALUES (?, ?, ?, ?, ?, ?);',
+          [product.name, product.stock || 0, product.price || 0, product.costPrice || 0, product.minQuantity, product.shopId]
         );
+        console.log(`✅ Produto inserido: ${product.name}`);
       } catch (error) {
-        console.error('Erro ao inserir produto:', error);
+        console.error('❌ Erro ao inserir produto:', error);
         throw error;
       }
     },
@@ -60,6 +70,10 @@ export async function getProductRepository(): Promise<ProductRepository> {
         if (product.price !== undefined) {
           updates.push('price = ?');
           values.push(product.price);
+        }
+        if (product.costPrice !== undefined) {
+          updates.push('costPrice = ?');
+          values.push(product.costPrice);
         }
         if (product.minQuantity !== undefined) {
           updates.push('minQuantity = ?');
@@ -90,6 +104,8 @@ export async function getProductRepository(): Promise<ProductRepository> {
 
 async function initializeProductsTable() {
   try {
+    await ensureTableStructure();
+    
     // Verificar se a tabela já tem a estrutura correta
     const tableInfo = db.getAllSync("PRAGMA table_info(products);");
     const hasStockColumn = tableInfo.some((col: any) => col.name === 'stock');
@@ -104,7 +120,10 @@ async function initializeProductsTable() {
           name TEXT NOT NULL,
           stock INTEGER DEFAULT 0,
           price REAL DEFAULT 0.0,
-          minQuantity INTEGER DEFAULT 5
+          costPrice REAL DEFAULT 0.0,
+          minQuantity INTEGER DEFAULT 5,
+          shopId TEXT NOT NULL DEFAULT 'default-shop',
+          dateCreated TEXT DEFAULT (datetime('now', 'localtime'))
         );
       `);
       
@@ -120,14 +139,30 @@ async function initializeProductsTable() {
 
         for (const product of sampleProducts) {
           db.runSync(
-            'INSERT INTO products (name, stock, price, minQuantity) VALUES (?, ?, ?, ?);',
-            [product.name, product.stock, product.price, product.minQuantity]
+            'INSERT INTO products (name, stock, price, minQuantity, shopId) VALUES (?, ?, ?, ?, ?);',
+            [product.name, product.stock, product.price, product.minQuantity, 'default-shop']
           );
         }
       }
     }
   } catch (error) {
     console.error('Erro ao inicializar tabela de produtos:', error);
+  }
+}
+
+async function ensureTableStructure() {
+  try {
+    // Verificar se costPrice existe
+    const tableInfo = db.getAllSync("PRAGMA table_info(products);") as any[];
+    const hasCostPrice = tableInfo.some(col => col.name === 'costPrice');
+    
+    if (!hasCostPrice) {
+      console.log('➕ Adicionando coluna costPrice...');
+      db.runSync('ALTER TABLE products ADD COLUMN costPrice REAL DEFAULT 0.0;');
+      console.log('✅ Coluna costPrice adicionada');
+    }
+  } catch (error) {
+    console.error('❌ Erro ao verificar estrutura da tabela:', error);
   }
 }
 

@@ -24,6 +24,9 @@ export default function Inventory() {
   const [products, setProducts] = useState<any[]>([]);
   const [newProductName, setNewProductName] = useState('');
   const [newProductQuantity, setNewProductQuantity] = useState('');
+  const [newProductPrice, setNewProductPrice] = useState('');
+  const [newProductCostPrice, setNewProductCostPrice] = useState('');
+  const [newProductMinQuantity, setNewProductMinQuantity] = useState('');
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
 
@@ -67,7 +70,7 @@ export default function Inventory() {
 
   const handleSaveProduct = async () => {
     if (!newProductName.trim() || !newProductQuantity.trim()) {
-      Alert.alert('Erro', 'Preencha todos os campos');
+      Alert.alert('Erro', 'Nome e quantidade são obrigatórios');
       return;
     }
 
@@ -76,13 +79,24 @@ export default function Inventory() {
       return;
     }
 
+    const quantity = parseInt(newProductQuantity);
+    const price = newProductPrice ? parseFloat(newProductPrice.replace(',', '.')) : 0;
+    const costPrice = newProductCostPrice ? parseFloat(newProductCostPrice.replace(',', '.')) : 0;
+    const minQuantity = newProductMinQuantity ? parseInt(newProductMinQuantity) : 5;
+
+    if (isNaN(quantity) || quantity < 0) {
+      Alert.alert('Erro', 'Quantidade deve ser um número válido');
+      return;
+    }
+
     const productData = {
       name: newProductName.trim(),
-      quantity: parseInt(newProductQuantity),
-      minQuantity: 5,
+      quantity: quantity,
+      stock: quantity, // Manter compatibilidade
+      minQuantity: minQuantity,
       shopId: activeShop.id,
-      stock: parseInt(newProductQuantity),
-      price: 0, // Valor padrão, pode ser editado depois
+      price: price,
+      costPrice: costPrice,
     };
 
     if (Platform.OS === 'web') {
@@ -142,47 +156,74 @@ export default function Inventory() {
   const resetForm = () => {
     setNewProductName('');
     setNewProductQuantity('');
+    setNewProductPrice('');
+    setNewProductCostPrice('');
+    setNewProductMinQuantity('5');
     setEditingProduct(null);
     setShowAddForm(false);
   };
 
-  const renderProduct = (item: any) => (
-    <View key={item.id} style={styles.productCard}>
-      <View style={styles.productContent}>
-        <View style={styles.productInfo}>
-          <Text style={styles.productName}>{item.name}</Text>
-          <Text style={styles.minQuantity}>Mínimo: {item.minQuantity}</Text>
-        </View>
-        <View style={styles.quantityInfo}>
-          <Text
-            style={[
-              styles.quantityText,
-              item.quantity <= item.minQuantity && { color: '#F87171' },
-            ]}
-          >
-            Qtd: {item.quantity}
-          </Text>
+  const renderProduct = (item: any) => {
+    const profit = item.price && item.costPrice ? item.price - item.costPrice : 0;
+    const profitMargin = item.price && item.costPrice && item.price > 0 
+      ? ((profit / item.price) * 100).toFixed(1)
+      : 0;
 
-          <View style={styles.actionButtons}>
-            <TouchableOpacity
-              onPress={() => {
-                setEditingProduct(item);
-                setNewProductName(item.name);
-                setNewProductQuantity(String(item.quantity));
-                setShowAddForm(true);
-              }}
+    return (
+      <View key={item.id} style={styles.productCard}>
+        <View style={styles.productContent}>
+          <View style={styles.productInfo}>
+            <Text style={styles.productName}>{item.name}</Text>
+            <Text style={styles.minQuantity}>Mínimo: {item.minQuantity}</Text>
+            
+            {item.price > 0 && (
+              <View style={styles.priceInfo}>
+                <Text style={styles.priceText}>Venda: R$ {item.price?.toFixed(2)}</Text>
+                {item.costPrice > 0 && (
+                  <Text style={styles.costText}>Custo: R$ {item.costPrice?.toFixed(2)}</Text>
+                )}
+                {profit > 0 && (
+                  <Text style={styles.profitText}>
+                    Lucro: R$ {profit.toFixed(2)} ({profitMargin}%)
+                  </Text>
+                )}
+              </View>
+            )}
+          </View>
+          <View style={styles.quantityInfo}>
+            <Text
+              style={[
+                styles.quantityText,
+                item.quantity <= item.minQuantity && { color: '#F87171' },
+              ]}
             >
-              <Edit color="#60A5FA" size={20} />
-            </TouchableOpacity>
+              Qtd: {item.quantity}
+            </Text>
 
-            <TouchableOpacity onPress={() => handleDeleteProduct(item.id)}>
-              <Trash2 color="#F87171" size={20} />
-            </TouchableOpacity>
+            <View style={styles.actionButtons}>
+              <TouchableOpacity
+                onPress={() => {
+                  setEditingProduct(item);
+                  setNewProductName(item.name);
+                  setNewProductQuantity(String(item.quantity));
+                  setNewProductPrice(item.price ? String(item.price) : '');
+                  setNewProductCostPrice(item.costPrice ? String(item.costPrice) : '');
+                  setNewProductMinQuantity(String(item.minQuantity || 5));
+                  setShowAddForm(true);
+                }}
+              >
+                <Edit color="#60A5FA" size={20} />
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => handleDeleteProduct(item.id)}>
+                <Trash2 color="#F87171" size={20} />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -228,6 +269,30 @@ export default function Inventory() {
               keyboardType="numeric"
             />
 
+            <Input
+              label="Preço de Venda (R$)"
+              placeholder="Ex: 15,90"
+              value={newProductPrice}
+              onChangeText={setNewProductPrice}
+              keyboardType="numeric"
+            />
+
+            <Input
+              label="Preço de Custo (R$)"
+              placeholder="Ex: 8,50"
+              value={newProductCostPrice}
+              onChangeText={setNewProductCostPrice}
+              keyboardType="numeric"
+            />
+
+            <Input
+              label="Quantidade Mínima"
+              placeholder="Ex: 5"
+              value={newProductMinQuantity}
+              onChangeText={setNewProductMinQuantity}
+              keyboardType="numeric"
+            />
+
             <View style={styles.buttonRow}>
               <View style={styles.buttonContainer}>
                 <Button
@@ -263,6 +328,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 24,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   addButtonText: { color: '#FFFFFF', fontWeight: '600' },
   formContainer: {
@@ -293,7 +360,29 @@ const styles = StyleSheet.create({
   },
   productInfo: { flex: 1 },
   productName: { color: '#FFFFFF', fontSize: 18, fontWeight: '600', marginBottom: 4 },
-  minQuantity: { color: '#A1A1AA', fontSize: 14 },
+  minQuantity: { color: '#A1A1AA', fontSize: 14, marginBottom: 4 },
+  priceInfo: { 
+    marginTop: 8,
+    padding: 8,
+    backgroundColor: '#27272A',
+    borderRadius: 6,
+  },
+  priceText: { 
+    color: '#10B981', 
+    fontSize: 14, 
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  costText: { 
+    color: '#F59E0B', 
+    fontSize: 14,
+    marginBottom: 2,
+  },
+  profitText: { 
+    color: '#3B82F6', 
+    fontSize: 14, 
+    fontWeight: '600',
+  },
   quantityInfo: { alignItems: 'flex-end' },
   quantityText: { color: '#10B981', fontWeight: '600' },
   actionButtons: { flexDirection: 'row', gap: 12, marginTop: 8 },

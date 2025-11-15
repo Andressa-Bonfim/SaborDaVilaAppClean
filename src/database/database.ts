@@ -1,10 +1,25 @@
 import * as SQLite from 'expo-sqlite';
 import * as FileSystem from 'expo-file-system/legacy';
+import { Platform } from 'react-native';
 
 const DB_NAME = 'saborDaVila.db';
 const DB_PATH = `${FileSystem.documentDirectory}SQLite/${DB_NAME}`;
 
-export const db = SQLite.openDatabaseSync(DB_NAME);
+// Verificação de plataforma para Android
+let db: SQLite.SQLiteDatabase;
+
+try {
+  if (Platform.OS === 'web') {
+    console.warn('⚠️ SQLite não suportado no navegador');
+  } else {
+    db = SQLite.openDatabaseSync(DB_NAME);
+    console.log('✅ Banco SQLite inicializado com sucesso');
+  }
+} catch (error) {
+  console.error('❌ Erro ao abrir banco SQLite:', error);
+}
+
+export { db };
 
 // Flag para evitar inicializações concorrentes
 let isInitializing = false;
@@ -13,6 +28,17 @@ let isInitialized = false;
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const initializeDatabase = async () => {
+  // Verificar plataforma
+  if (Platform.OS === 'web') {
+    console.warn('⚠️ SQLite não suportado no navegador');
+    return;
+  }
+
+  if (!db) {
+    console.error('❌ Banco SQLite não inicializado');
+    return;
+  }
+
   // Evitar múltiplas inicializações simultâneas
   if (isInitializing) {
     console.log('⏳ Aguardando inicialização em progresso...');
@@ -22,8 +48,26 @@ export const initializeDatabase = async () => {
     return;
   }
 
+  // Log específico para Android
+  if (Platform.OS === 'android') {
+    console.log('🤖 Inicializando SQLite no Android...');
+  }
+
   if (isInitialized) {
-      // Migração da tabela shops se necessário
+    // Migração da tabela products para adicionar costPrice se não existir
+    try {
+      const productsTableInfo = db.getAllSync(`PRAGMA table_info(products)`) as any[];
+      const hasCostPrice = productsTableInfo.some(col => col.name === 'costPrice');
+      
+      if (!hasCostPrice) {
+        db.execSync('ALTER TABLE products ADD COLUMN costPrice REAL DEFAULT 0.0;');
+        console.log('✅ Coluna costPrice adicionada à tabela products');
+      }
+    } catch (error) {
+      console.error('❌ Erro ao migrar tabela products para costPrice:', error);
+    }
+
+    // Migração da tabela shops se necessário
   try {
     const shopsTableInfo = db.getAllSync(`PRAGMA table_info(shops)`) as any[];
     const hasDateCreated = shopsTableInfo.some(col => col.name === 'dateCreated');
@@ -195,6 +239,8 @@ const createTables = async () => {
       name TEXT NOT NULL,
       quantity INTEGER NOT NULL,
       minQuantity INTEGER NOT NULL,
+      price REAL NOT NULL DEFAULT 0.0,
+      costPrice REAL NOT NULL DEFAULT 0.0,
       shopId TEXT NOT NULL DEFAULT 'default-shop',
       dateCreated TEXT DEFAULT (datetime('now', 'localtime'))
     );
@@ -229,6 +275,7 @@ const migrateTables = async () => {
         name TEXT NOT NULL,
         stock INTEGER NOT NULL DEFAULT 0,
         price REAL NOT NULL DEFAULT 0.0,
+        costPrice REAL NOT NULL DEFAULT 0.0,
         minQuantity INTEGER NOT NULL DEFAULT 5,
         shopId TEXT NOT NULL DEFAULT 'default-shop',
         dateCreated TEXT DEFAULT (datetime('now', 'localtime'))
@@ -237,19 +284,32 @@ const migrateTables = async () => {
 
     // Copiar dados baseado nas colunas disponíveis
     if (hasDateCreated && hasShopId && hasStock && hasPrice) {
-      // Tabela já tem todas as colunas
-      db.execSync(`
-        INSERT INTO products_new (id, name, stock, price, minQuantity, shopId, dateCreated)
-        SELECT id, name, stock, price, minQuantity, shopId, dateCreated FROM products;
-      `);
+      // Verificar se tem costPrice
+      const hasCostPrice = (productsColumns as any[]).some(col => col.name === 'costPrice');
+      
+      if (hasCostPrice) {
+        // Tabela já tem todas as colunas incluindo costPrice
+        db.execSync(`
+          INSERT INTO products_new (id, name, stock, price, costPrice, minQuantity, shopId, dateCreated)
+          SELECT id, name, stock, price, costPrice, minQuantity, shopId, dateCreated FROM products;
+        `);
+      } else {
+        // Tem todas as colunas mas não costPrice
+        db.execSync(`
+          INSERT INTO products_new (id, name, stock, price, costPrice, minQuantity, shopId, dateCreated)
+          SELECT id, name, stock, price, 0.0, minQuantity, shopId, dateCreated FROM products;
+        `);
+      }
     } else if (hasStock && hasPrice) {
-      // Tem stock e price mas pode não ter shopId/dateCreated
+      // Tem stock e price mas pode não ter shopId/dateCreated/costPrice
+      const hasCostPrice = (productsColumns as any[]).some(col => col.name === 'costPrice');
       const shopIdCol = hasShopId ? 'shopId' : "'default-shop'";
       const dateCol = hasDateCreated ? 'dateCreated' : "datetime('now', 'localtime')";
+      const costPriceCol = hasCostPrice ? 'costPrice' : '0.0';
       
       db.execSync(`
-        INSERT INTO products_new (id, name, stock, price, minQuantity, shopId, dateCreated)
-        SELECT id, name, stock, price, minQuantity, ${shopIdCol}, ${dateCol} FROM products;
+        INSERT INTO products_new (id, name, stock, price, costPrice, minQuantity, shopId, dateCreated)
+        SELECT id, name, stock, price, ${costPriceCol}, minQuantity, ${shopIdCol}, ${dateCol} FROM products;
       `);
     } else {
       // Tabela antiga com quantity - migrar para stock
@@ -258,8 +318,8 @@ const migrateTables = async () => {
       const dateCol = hasDateCreated ? 'dateCreated' : "datetime('now', 'localtime')";
       
       db.execSync(`
-        INSERT INTO products_new (id, name, stock, price, minQuantity, shopId, dateCreated)
-        SELECT id, name, ${stockCol}, 0.0, minQuantity, ${shopIdCol}, ${dateCol} FROM products;
+        INSERT INTO products_new (id, name, stock, price, costPrice, minQuantity, shopId, dateCreated)
+        SELECT id, name, ${stockCol}, 0.0, 0.0, minQuantity, ${shopIdCol}, ${dateCol} FROM products;
       `);
     }
 
@@ -277,6 +337,7 @@ const migrateTables = async () => {
           name TEXT NOT NULL,
           stock INTEGER NOT NULL DEFAULT 0,
           price REAL NOT NULL DEFAULT 0.0,
+          costPrice REAL NOT NULL DEFAULT 0.0,
           minQuantity INTEGER NOT NULL DEFAULT 5,
           shopId TEXT NOT NULL DEFAULT 'default-shop',
           dateCreated TEXT DEFAULT (datetime('now', 'localtime'))
@@ -366,6 +427,7 @@ const createBasicTables = async () => {
       name TEXT NOT NULL,
       stock INTEGER NOT NULL DEFAULT 0,
       price REAL NOT NULL DEFAULT 0.0,
+      costPrice REAL NOT NULL DEFAULT 0.0,
       minQuantity INTEGER NOT NULL DEFAULT 5,
       shopId TEXT NOT NULL DEFAULT 'default-shop',
       dateCreated TEXT DEFAULT (datetime('now', 'localtime'))
@@ -421,6 +483,7 @@ export const forceTableReset = () => {
         name TEXT NOT NULL,
         stock INTEGER NOT NULL DEFAULT 0,
         price REAL NOT NULL DEFAULT 0.0,
+        costPrice REAL NOT NULL DEFAULT 0.0,
         minQuantity INTEGER NOT NULL DEFAULT 5,
         shopId TEXT NOT NULL DEFAULT 'default-shop',
         dateCreated TEXT DEFAULT (datetime('now', 'localtime'))

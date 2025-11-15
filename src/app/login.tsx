@@ -58,8 +58,8 @@ export default function LoginScreen() {
           // Usuário tem lojas, redirecionar para o app
           router.replace('/tabs');
         } else {
-          // Usuário não tem lojas, redirecionar para criar primeira loja
-          router.replace('/create-first-shop');
+          // Usuário não tem lojas, redirecionar para o app (criará loja automaticamente)
+          router.replace('/tabs');
         }
       } else {
         Alert.alert('Erro no Login', result.message);
