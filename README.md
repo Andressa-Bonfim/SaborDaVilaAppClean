@@ -295,7 +295,7 @@ npx expo doctor         # Diagnóstico do projeto
 **Andressa Bonfim de Araujo**
 - [LinkedIn](https://www.linkedin.com/in/andressa-bonfim/)
 
-  **Alison Longuinho Oliveira**
+**Alison Longuinho Oliveira**
 - [LinkedIn](https://www.linkedin.com/in/alison-longuinho-oliveira-/)
 - [GitHub](https://github.com/AlisonLonguinho)
 
